@@ -3,7 +3,7 @@
 import React, { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Bot, Loader2, Send } from 'lucide-react';
+import { BrainCircuit, Loader2, Send } from 'lucide-react';
 
 import { answerQuestionAction } from '@/app/actions';
 import { Button } from '@/components/ui/button';
@@ -49,7 +49,7 @@ export default function TestAgentPage() {
         <CardHeader>
           <div className="flex items-center gap-3 mb-2">
             <div className="bg-primary text-primary-foreground p-2 rounded-lg">
-              <Bot className="h-6 w-6" />
+              <BrainCircuit className="h-6 w-6" />
             </div>
             <CardTitle className="text-2xl font-bold font-headline text-foreground">
               Test Your Custom Agent

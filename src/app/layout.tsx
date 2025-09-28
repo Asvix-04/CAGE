@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'AgentForge',
+  title: 'CAGE',
   description: 'Create your own custom AI agent.',
 };
 

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { Bot, User, Wand2 } from 'lucide-react';
+import { BrainCircuit, User, Wand2 } from 'lucide-react';
 import type { AgentData } from '@/lib/types';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -29,7 +29,7 @@ export default function AgentPreview({ agentData, isLoading }: AgentPreviewProps
         <Avatar className="h-24 w-24 mb-4 ring-4 ring-primary/20">
           <AvatarImage src={agentData.formValues.avatar} alt={agentData.formValues.agentName} data-ai-hint="abstract robot" />
           <AvatarFallback>
-            <Bot className="h-10 w-10 text-muted-foreground" />
+            <BrainCircuit className="h-10 w-10 text-muted-foreground" />
           </AvatarFallback>
         </Avatar>
         <CardTitle className="font-headline text-2xl">{agentData.formValues.agentName}</CardTitle>

@@ -3,7 +3,7 @@
 import React, { useState, useTransition, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Bot, Loader2, Send, User } from 'lucide-react';
+import { BrainCircuit, Loader2, Send, User } from 'lucide-react';
 
 import { chatWithAgentAction } from '@/app/actions';
 import { Button } from '@/components/ui/button';
@@ -78,7 +78,7 @@ export default function Chatbot({ agentName, contextData, introMessage }: Chatbo
   return (
     <div className="space-y-4 pt-4 border-t">
        <h3 className="text-lg font-semibold flex items-center gap-2">
-        <Bot className="text-primary h-5 w-5" />
+        <BrainCircuit className="text-primary h-5 w-5" />
         Chat with {agentName}
       </h3>
       <div className="p-4 border rounded-lg space-y-4 bg-background/50">
@@ -93,7 +93,7 @@ export default function Chatbot({ agentName, contextData, introMessage }: Chatbo
               >
                 {message.role === 'agent' && (
                   <div className="bg-primary text-primary-foreground p-2 rounded-full">
-                    <Bot className="h-4 w-4" />
+                    <BrainCircuit className="h-4 w-4" />
                   </div>
                 )}
                 <div
@@ -115,7 +115,7 @@ export default function Chatbot({ agentName, contextData, introMessage }: Chatbo
              {isPending && (
                 <div className="flex items-start gap-3">
                    <div className="bg-primary text-primary-foreground p-2 rounded-full">
-                    <Bot className="h-4 w-4" />
+                    <BrainCircuit className="h-4 w-4" />
                   </div>
                   <div className="rounded-lg px-3 py-2 text-sm bg-muted flex items-center">
                     <Loader2 className="h-4 w-4 animate-spin" />
