@@ -2,7 +2,8 @@
 
 import { generateAgent, type GenerateAgentOutput } from '@/ai/flows/instant-agent-generation';
 import { shouldLimitResponse, type ShouldLimitResponseOutput } from '@/ai/flows/parameter-definition-assistance';
-import { agentForgeActionSchema, testAgentSchema } from '@/lib/schemas';
+import { answerQuestion, type AnswerQuestionInput } from '@/ai/flows/custom-agent';
+import { agentForgeActionSchema, testAgentSchema, testCustomAgentSchema } from '@/lib/schemas';
 import { z } from 'zod';
 
 export async function forgeAgentAction(
@@ -38,5 +39,19 @@ export async function analyzeResponseAction(
   } catch (error) {
     console.error(error);
     return { success: false, error: 'Failed to analyze response. Please try again.' };
+  }
+}
+
+export async function answerQuestionAction(values: AnswerQuestionInput) {
+  const validatedFields = testCustomAgentSchema.safeParse(values);
+  if (!validatedFields.success) {
+    return { success: false, error: 'Invalid fields.' };
+  }
+  try {
+    const result = await answerQuestion(validatedFields.data);
+    return { success: true, data: result };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: 'Failed to get answer. Please try again.' };
   }
 }

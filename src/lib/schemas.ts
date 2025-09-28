@@ -24,3 +24,10 @@ export const testAgentSchema = z.object({
 });
 
 export type TestAgentValues = z.infer<typeof testAgentSchema>;
+
+export const testCustomAgentSchema = z.object({
+  contextData: z.string().min(1, "Context data cannot be empty."),
+  question: z.string().min(1, "Question cannot be empty."),
+});
+
+export type TestCustomAgentValues = z.infer<typeof testCustomAgentSchema>;
