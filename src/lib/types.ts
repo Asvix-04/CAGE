@@ -1,17 +1,11 @@
 import type { ShouldLimitResponseOutput } from "@/ai/flows/parameter-definition-assistance";
 import type { GenerateAgentOutput } from "@/ai/flows/instant-agent-generation";
+import { AgentForgeFormValues } from "./schemas";
 
 export type AgentData = {
-  formValues: {
-    agentName: string;
-    avatar: string; // data URI
-    introductoryMessage: string;
-    tone: string;
-    responseLength: string;
-    areasOfExpertise: string;
-    knowledgeBoundaries: string;
-  };
+  formValues: AgentForgeFormValues;
   agentDescription: GenerateAgentOutput['agentDescription'];
+  contextData: string;
 };
 
 export type SetAgentData = React.Dispatch<React.SetStateAction<AgentData | null>>;

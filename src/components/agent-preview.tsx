@@ -3,23 +3,18 @@
 import React from 'react';
 import Image from 'next/image';
 import { Bot, User, Wand2 } from 'lucide-react';
-import type { AgentData, SetAnalysis, SetIsAnalyzing } from '@/lib/types';
-import type { ShouldLimitResponseOutput } from '@/ai/flows/parameter-definition-assistance';
+import type { AgentData } from '@/lib/types';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import AgentTester from './agent-tester';
+import Chatbot from './chatbot';
 
 type AgentPreviewProps = {
   agentData: AgentData | null;
   isLoading: boolean;
-  analysis: ShouldLimitResponseOutput | null;
-  setAnalysis: SetAnalysis;
-  isAnalyzing: boolean;
-  setIsAnalyzing: SetIsAnalyzing;
 };
 
-export default function AgentPreview({ agentData, isLoading, ...testerProps }: AgentPreviewProps) {
+export default function AgentPreview({ agentData, isLoading }: AgentPreviewProps) {
   if (isLoading) {
     return <LoadingSkeleton />;
   }
@@ -45,7 +40,11 @@ export default function AgentPreview({ agentData, isLoading, ...testerProps }: A
           <h4 className="font-semibold mb-2 text-primary">Agent Description</h4>
           <p className="text-sm text-muted-foreground">{agentData.agentDescription}</p>
         </div>
-        <AgentTester agentData={agentData} {...testerProps} />
+        <Chatbot
+            agentName={agentData.formValues.agentName}
+            contextData={agentData.contextData}
+            introMessage={agentData.formValues.introductoryMessage}
+          />
       </CardContent>
     </Card>
   );

@@ -10,8 +10,10 @@ import type { ShouldLimitResponseOutput } from '@/ai/flows/parameter-definition-
 export default function Home() {
   const [agentData, setAgentData] = useState<AgentData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // This state is no longer used by AgentPreview, but we'll keep it for now
+  // in case we want to re-introduce response analysis in a different way.
   const [analysis, setAnalysis] = useState<ShouldLimitResponseOutput | null>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   return (
     <div className="min-h-screen w-full bg-background">
@@ -31,18 +33,15 @@ export default function Home() {
             <AgentBuilderForm
               setAgentData={setAgentData}
               setIsLoading={setIsLoading}
-              setAnalysis={setAnalysis}
-              key={agentData ? 'loaded' : 'initial'} // Re-mount form on successful creation
+              // Pass a setter that does nothing for now
+              setAnalysis={() => {}}
+              key={agentData ? 'loaded' : 'initial'}
             />
           </div>
           <div className="lg:col-span-2 sticky top-24">
             <AgentPreview
               agentData={agentData}
               isLoading={isLoading}
-              setAnalysis={setAnalysis}
-              analysis={analysis}
-              isAnalyzing={isAnalyzing}
-              setIsAnalyzing={setIsAnalyzing}
             />
           </div>
         </div>

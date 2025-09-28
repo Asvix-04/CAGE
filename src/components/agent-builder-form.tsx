@@ -4,7 +4,7 @@ import React, { useState, useEffect, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Image from 'next/image';
-import { UploadCloud, Sparkles, Loader2, Wand2 } from 'lucide-react';
+import { UploadCloud, Sparkles, Loader2, Wand2, FileText } from 'lucide-react';
 import { agentForgeFormSchema, type AgentForgeFormValues } from '@/lib/schemas';
 import { forgeAgentAction } from '@/app/actions';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
@@ -28,6 +28,14 @@ const toBase64 = (file: File): Promise<string> => new Promise((resolve, reject) 
     reader.onerror = error => reject(error);
 });
 
+const fileToText = (file: File): Promise<string> => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsText(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = error => reject(error);
+});
+
+
 type AgentBuilderFormProps = {
   setAgentData: SetAgentData;
   setIsLoading: SetIsLoading;
@@ -38,13 +46,15 @@ export default function AgentBuilderForm({ setAgentData, setIsLoading, setAnalys
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const [avatarPreview, setAvatarPreview] = useState<string | null>(PlaceHolderImages.find(p => p.id === 'default-avatar')?.imageUrl ?? null);
+  const [fileName, setFileName] = useState<string>('');
+
 
   const form = useForm<AgentForgeFormValues>({
     resolver: zodResolver(agentForgeFormSchema),
     defaultValues: {
       agentName: '',
       introductoryMessage: '',
-      uploadedData: '',
+      uploadedData: undefined,
       tone: '',
       responseLength: 'medium',
       areasOfExpertise: '',
@@ -57,7 +67,9 @@ export default function AgentBuilderForm({ setAgentData, setIsLoading, setAnalys
     if (savedData) {
       try {
         const parsed = JSON.parse(savedData);
-        form.reset(parsed);
+        // Don't restore file inputs
+        const { avatar, uploadedData, ...rest } = parsed;
+        form.reset(rest);
       } catch (e) {
         console.error("Failed to parse saved form data", e);
       }
@@ -66,7 +78,8 @@ export default function AgentBuilderForm({ setAgentData, setIsLoading, setAnalys
 
   useEffect(() => {
     const subscription = form.watch((value) => {
-      const { avatar, ...rest } = value;
+      // Don't save file inputs to local storage
+      const { avatar, uploadedData, ...rest } = value;
       localStorage.setItem('agent-forge-form', JSON.stringify(rest));
     });
     return () => subscription.unsubscribe();
@@ -89,28 +102,41 @@ export default function AgentBuilderForm({ setAgentData, setIsLoading, setAnalys
           return;
         }
       }
+      
+      let trainingData = '';
+      if (values.uploadedData && values.uploadedData.length > 0) {
+         try {
+           trainingData = await fileToText(values.uploadedData[0]);
+         } catch(e) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not read the uploaded file.' });
+            setIsLoading(false);
+            return;
+         }
+      } else {
+        toast({ variant: 'destructive', title: 'Error', description: 'Please upload training data.' });
+        setIsLoading(false);
+        return;
+      }
 
-      const actionValues = { ...values, avatar: avatarDataUri };
+
+      const actionValues = { ...values, uploadedData: trainingData, avatar: avatarDataUri };
 
       const result = await forgeAgentAction(actionValues);
       
       if (result.success) {
         setAgentData({
           formValues: {
-            agentName: values.agentName,
+            ...values,
             avatar: avatarDataUri,
-            introductoryMessage: values.introductoryMessage,
-            tone: values.tone,
-            responseLength: values.responseLength,
-            areasOfExpertise: values.areasOfExpertise,
-            knowledgeBoundaries: values.knowledgeBoundaries,
           },
+          contextData: trainingData,
           agentDescription: result.data.agentDescription,
         });
         toast({ title: 'Success!', description: 'Your AI agent has been forged.' });
         form.reset();
         localStorage.removeItem('agent-forge-form');
         setAvatarPreview(PlaceHolderImages.find(p => p.id === 'default-avatar')?.imageUrl ?? null);
+        setFileName('');
       } else {
         toast({ variant: 'destructive', title: 'Error', description: result.error });
         setAgentData(null);
@@ -130,6 +156,17 @@ export default function AgentBuilderForm({ setAgentData, setIsLoading, setAnalys
       }
     } else {
       setAvatarPreview(PlaceHolderImages.find(p => p.id === 'default-avatar')?.imageUrl ?? null);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFileName(file.name);
+      form.setValue('uploadedData', e.target.files);
+    } else {
+      setFileName('');
+      form.setValue('uploadedData', undefined);
     }
   };
 
@@ -209,18 +246,46 @@ export default function AgentBuilderForm({ setAgentData, setIsLoading, setAnalys
                 <UploadCloud className="text-primary h-5 w-5" />
                 2. Data Source
               </h3>
-              <FormField
-                control={form.control}
-                name="uploadedData"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Training Data</FormLabel>
-                    <FormControl><Textarea rows={6} placeholder="Paste your text, documents, or any data to train your agent..." {...field} /></FormControl>
-                    <FormDescription>Provide the knowledge base for your agent.</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+               <FormField
+                  control={form.control}
+                  name="uploadedData"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Training Data</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            type="file"
+                            accept=".txt"
+                            className="hidden"
+                            id="file-upload"
+                            onChange={handleFileChange}
+                          />
+                          <label
+                            htmlFor="file-upload"
+                            className="flex items-center justify-center w-full h-32 px-4 transition bg-transparent border-2 border-dashed rounded-md appearance-none cursor-pointer hover:border-primary/80 focus:outline-none"
+                          >
+                            {fileName ? (
+                              <div className="flex items-center space-x-2 text-foreground">
+                                <FileText className="h-6 w-6" />
+                                <span className="font-medium">{fileName}</span>
+                              </div>
+                            ) : (
+                              <span className="flex items-center space-x-2 text-muted-foreground">
+                                <UploadCloud className="h-6 w-6" />
+                                <span className="font-medium">Click to upload a .txt file</span>
+                              </span>
+                            )}
+                          </label>
+                        </div>
+                      </FormControl>
+                      <FormDescription>
+                        Provide the knowledge base for your agent.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
             </section>
             
             <Separator />
