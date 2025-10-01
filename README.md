@@ -18,7 +18,7 @@ CAGE is a framework that enables you to build your own AI agent quickly and flex
 
 - Node.js (version 16 or above)
 - npm or yarn package manager
-- Access to an LLM API (e.g. OpenAI, Cohere, or any compatible provider)
+- Access to an LLM API (ex: OpenAI, Cohere, or any compatible provider)
 
 ### Installation
 
